@@ -1,0 +1,198 @@
+openapi: 3.0.0
+info:
+  title: Google Calendar API
+  version: '1.0'
+servers:
+  - url: 'https://www.googleapis.com'
+    description: Google Calendar PlatformのAPIを利用
+tags:
+  - name: userinfo
+    description: 'ユーザ情報を取得'
+  - name: calendar
+    description: 'Google Calendarの情報を取得'
+security:
+  - Bearer: []
+paths:
+  /userinfo/v2/me:
+    get:
+      tags:
+        - userinfo
+      operationId: getUserinfo
+      responses:
+        '200':
+          $ref: '#/components/responses/userinfo'
+  /calendar/v3/users/me/calendarList:
+    get:
+      tags:
+        - calendar
+      summary: 'ユーザのカレンダーIDを取得'
+      operationId: getCalendarList
+      parameters:
+        - $ref: '#/components/parameters/minAccessRole'
+      responses:
+        '200':
+          $ref: '#/components/responses/calendarList'
+  /calendar/v3/freeBusy:
+    post:
+      tags:
+        - calendar
+      summary: 'カレンダーの空き予定を検索'
+      operationId: getFreeBusy
+      requestBody:
+        $ref: '#/components/requestBodies/freeBusy'
+      responses:
+        '200':
+          $ref: '#/components/responses/freeBusy'
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    minAccessRole:
+      name: minAccessRole
+      in: query
+      schema:
+        type: string
+        default: 'freeBusyReader'
+  requestBodies:
+    freeBusy:
+      description: |
+        パラメータの詳細
+        - timeMin : 開始時刻（RFC3339 形式）
+        - timeMax : 終了終了（RFC3339 形式）
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              timeMin:
+                $ref: '#/components/schemas/timeMin'
+              timeMax:
+                $ref: '#/components/schemas/timeMax'
+              timeZone:
+                $ref: '#/components/schemas/timeZone'
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+            required:
+              - timeMin
+              - timeMax
+  responses:
+    userinfo:
+      description: ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/userinfo'
+    calendarList:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              kind:
+                $ref: '#/components/schemas/kind'
+              etag:
+                type: string
+              nextPageToken:
+                type: string
+              nextSyncToken:
+                type: string
+              items:
+                type: array
+                items:
+                  $ref: '#/components/schemas/calendarList'
+    freeBusy:
+      description: ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/freeBusy'
+  schemas:
+    userinfo:
+      type: object
+      properties:
+        email:
+          type: string
+        family_name:
+          type: string
+        given_name:
+          type: string
+        id:
+          type: string
+        locale:
+          type: string
+        name:
+          type: string
+        picture:
+          type: string
+        verified_email:
+          type: boolean
+    calendarList:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/kind'
+        id:
+          type: string
+        primary:
+          type: boolean
+    freeBusy:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/kind'
+        timeMin:
+          $ref: '#/components/schemas/timeMin'
+        timeMax:
+          $ref: '#/components/schemas/timeMax'
+        calendars:
+          type: object
+          properties:
+            keys:
+              $ref: '#/components/schemas/keys'
+    kind:
+      type: string
+    timeMin:
+      type: string
+      format: date-time
+    timeMax:
+      type: string
+      format: date-time
+    timeZone:
+      type: string
+      default: 'Asia/Tokyo'
+    keys:
+      type: object
+      properties:
+        errors:
+          $ref: '#/components/schemas/errors'
+        busy:
+          $ref: '#/components/schemas/busy'
+    errors:
+      type: array
+      items:
+        type: object
+        properties:
+          domain:
+            type: string
+          reason:
+            type: string
+    busy:
+      type: array
+      items:
+        type: object
+        properties:
+          start:
+            type: string
+            format: date-time
+          end:
+            type: string
+            format: date-time
