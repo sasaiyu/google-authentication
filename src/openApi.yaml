@@ -43,6 +43,20 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/freeBusy'
+  /calendar/v3/calendars/{calendarId}/events:
+    get:
+      tags:
+        - calendar
+      summary: 'カレンダーのイベント内容を取得'
+      operationId: getCalendarEvents
+      parameters:
+        - $ref: '#/components/parameters/calendarId'
+        - $ref: '#/components/parameters/orderBy'
+        - $ref: '#/components/parameters/timeMin'
+        - $ref: '#/components/parameters/timeMax'
+      responses:
+        '200':
+          $ref: '#/components/responses/calendarEvents'
 components:
   securitySchemes:
     Bearer:
@@ -56,6 +70,32 @@ components:
       schema:
         type: string
         default: 'freeBusyReader'
+    calendarId:
+      name: calendarId
+      in: path
+      required: true
+      schema:
+        type: string
+        default: 'primary'
+    orderBy:
+      name: orderBy
+      in: query
+      schema:
+        type: string
+      description: |
+        パラメータの詳細
+        - startTime : 開始順
+        - updated : 更新順
+    timeMin:
+      name: timeMin
+      in: query
+      schema:
+        $ref: '#/components/schemas/timeMin'
+    timeMax:
+      name: timeMax
+      in: query
+      schema:
+        $ref: '#/components/schemas/timeMax'
   requestBodies:
     freeBusy:
       description: |
@@ -100,11 +140,11 @@ components:
               kind:
                 $ref: '#/components/schemas/kind'
               etag:
-                type: string
+                $ref: '#/components/schemas/etag'
               nextPageToken:
-                type: string
+                $ref: '#/components/schemas/nextPageToken'
               nextSyncToken:
-                type: string
+                $ref: '#/components/schemas/nextSyncToken'
               items:
                 type: array
                 items:
@@ -114,7 +154,47 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/freeBusy'
+            type: object
+            properties:
+              kind:
+                $ref: '#/components/schemas/kind'
+              timeMin:
+                $ref: '#/components/schemas/timeMin'
+              timeMax:
+                $ref: '#/components/schemas/timeMax'
+              calendars:
+                type: object
+                properties:
+                  keys:
+                    $ref: '#/components/schemas/keys'
+    calendarEvents:
+      description: ok
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              kind:
+                $ref: '#/components/schemas/kind'
+              etag:
+                $ref: '#/components/schemas/etag'
+              summary:
+                type: string
+              description:
+                type: string
+              updated:
+                type: string
+                format: date-time
+              timeZone:
+                type: string
+              nextPageToken:
+                $ref: '#/components/schemas/nextPageToken'
+              nextSyncToken:
+                $ref: '#/components/schemas/nextSyncToken'
+              items:
+                type: array
+                items:
+                  $ref: '#/components/schemas/events'
   schemas:
     userinfo:
       type: object
@@ -144,21 +224,13 @@ components:
           type: string
         primary:
           type: boolean
-    freeBusy:
-      type: object
-      properties:
-        kind:
-          $ref: '#/components/schemas/kind'
-        timeMin:
-          $ref: '#/components/schemas/timeMin'
-        timeMax:
-          $ref: '#/components/schemas/timeMax'
-        calendars:
-          type: object
-          properties:
-            keys:
-              $ref: '#/components/schemas/keys'
     kind:
+      type: string
+    etag:
+      type: string
+    nextPageToken:
+      type: string
+    nextSyncToken:
       type: string
     timeMin:
       type: string
@@ -196,3 +268,35 @@ components:
           end:
             type: string
             format: date-time
+    events:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/kind'
+        etag:
+          $ref: '#/components/schemas/etag'
+        updated:
+          type: string
+          format: date-time
+        summary:
+          type: string
+        id:
+          type: string
+        start:
+          type: object
+          properties:
+            date:
+              type: string
+              format: date
+            dateTime:
+              type: string
+              format: date-time
+        end:
+          type: object
+          properties:
+            date:
+              type: string
+              format: date
+            dateTime:
+              type: string
+              format: date-time

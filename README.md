@@ -32,15 +32,27 @@ npm run dev
   - 定義は `tsconfig.json` の`paths` に記載する
   - `@/` は プロジェクトフォルダ配下の `src/`、`~/` は `./` になる
 
-## OpenAPI Generator
+## Google 認証のライブラリ
 
-### OpenAPI Generator での自動生成
+利用しているライブラリは[こちら](https://github.com/MomenSherif/react-oauth?tab=readme-ov-file)
+
+## OpenAPI Generator での自動生成
+
+OpenAPI Generator は API のドキュメント（Swagger Doc）とソースの自動生成ができる。
+
+- インストール
 
 詳細は [こちら](https://zenn.dev/overflow_offers/articles/20220620-openapi-generator)
 
-VSCode の拡張機能（[42crunch.vscode-openapi](42crunch.vscode-openapi) で検索）をインストールすると、yaml を Swager Doc で表示できる
+```bash
+# パッケージのインストール
+npm install @openapitools/openapi-generator-cli -D
 
-package.json に yaml の格納先 `-i src/openApi.yaml` と出力先 `-o src/types/typescript-axios` を定義して、`npm run generate-typescript-axios` を実行すると自動生成される
+#パッケージを動かすために、javaがインストールされている必要がある
+java --version
+```
+
+`package.json` に yaml の格納先 `-i src/openApi.yaml` と出力先 `-o src/types/typescript-axios` を定義する。
 
 ```bash
   "scripts": {
@@ -48,16 +60,27 @@ package.json に yaml の格納先 `-i src/openApi.yaml` と出力先 `-o src/ty
   },
 ```
 
-### OpenAPI Generator で生成した POJO を実装
+`num run` を実行すると自動生成される。
+
+```bash
+# yamlの内容をもとに自動生成
+npm run generate-typescript-axios
+```
+
+- yaml の作成と Swagger Doc の自動生成
+
+VSCode の拡張機能（[42crunch.vscode-openapi](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) で検索）をインストールすると、yaml を Swager Doc で表示できる。
+
+- コードの自動生成
 
 自動生成したインターフェイスは直接は変更せず、インポートして委譲する形で使用する。以下の例では、自動生成された `Configuration` と `UserinfoApi` をインスタンス化して、一部を加工することで利用している。
 
 ```javascript
+// src/components/LoginButton.tsx
 // 自動生成されたConfigurationをインスタンス化
 const config = new Configuration();
 // Googleログイン認証で取得したBear認証に変更
 config.accessToken = token;
-
 // ユーザ情報を取得
 const userinfo = await getUserinfo(config);
 
@@ -66,7 +89,74 @@ export const getUserinfo = async (config: Configuration) => {
   const userInfoApi = new UserinfoApi(config);
   // getUserinfoメソッドを実行して、レスポンスを取得する
   const userInfo = await userInfoApi.getUserinfo();
-  // 使いやすいように加工する。
+  // 使いやすいようにレスポンスを加工する。
   return userInfo.data;
 };
+```
+
+- カレンダー情報の取得
+
+カレンダー情報は GCP Calender API の [freeBusy](https://developers.google.com/calendar/api/v3/reference/freebusy/query?hl=ja)で取得できる。ただし、リクエストパラメータにある[カレンダー ID](https://developers.google.com/calendar/api/concepts/events-calendars?hl=ja#calendar_and_calendar_list) は事前に取得しておくこと。
+
+```url
+https://www.googleapis.com/calendar/v3/freeBusy
+```
+
+レスポンスの例は以下。
+
+```json
+{
+  "kind": "string",
+  "timeMin": "2024-04-07T09:41:44.507Z",
+  "timeMax": "2024-04-07T09:41:44.507Z",
+  "calendars": {
+    "keys": {
+      "errors": [
+        {
+          "domain": "string",
+          "reason": "string"
+        }
+      ],
+      "busy": [
+        {
+          /* ここの値を取得したい */
+          "start": "2024-04-07T09:41:44.507Z",
+          "end": "2024-04-07T09:41:44.507Z"
+        }
+      ]
+    }
+  }
+}
+```
+
+上記の JSON 構造に対応する POJO は自動生成されるため、POJO のクラスを紐解いていけば欲しい情報が取得できる。
+
+```javascript
+# src/OpenApi.ts
+export const getFreeBusy = async (
+  config: Configuration,
+  param: GetFreeBusyRequest
+) => {
+  // 自動生成されたメソッドを実行してレスポンスを取得
+  const freeBusy = await new CalendarApi(config).getFreeBusy(param);
+  // レスポンスのcaldendersタグの値を取得
+  const calendars = freeBusy.data.calendars;
+  // keysタグにはカレンダーIDが入るため、バリューを展開して配列にしたあと、busyタグの値を取得
+  return Object.values(calendars || {})[0]['busy'];
+};
+```
+
+実行結果は以下。4 月 6 日 10 時～ 13:30、16 時～ 18 時にスケジュールを入れているが、UTC 標準時間（日本時間からマイナス 9 時間）で取得されている。
+
+```json
+[
+  {
+    "start": "2024-04-06T01:00:00Z",
+    "end": "2024-04-06T04:30:00Z"
+  },
+  {
+    "start": "2024-04-06T07:00:00Z",
+    "end": "2024-04-06T09:00:00Z"
+  }
+]
 ```
