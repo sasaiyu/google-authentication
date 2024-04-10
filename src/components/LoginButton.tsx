@@ -4,7 +4,7 @@ import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import { googleConfig } from '@/config';
 import { GetFreeBusyRequest } from '@/types/typescript-axios/api';
 import { Configuration } from '@/types/typescript-axios';
-import { getCalendarList, getFreeBusy, getUserinfo } from '~/src/OpenApi';
+import { getCalendarList, getFreeBusy, getUserinfo } from '@/OpenApi';
 
 export const LoginButton = () => {
   const [token, setToken] = useState<string>('');

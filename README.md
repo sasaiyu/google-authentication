@@ -60,7 +60,7 @@ java --version
   },
 ```
 
-`num run` を実行すると自動生成される。
+`num run` を実行すると自動生成される。上記の例だと、`src/types/typescript-axios/api.ts`に API を実行するクラス群が記載される。
 
 ```bash
 # yamlの内容をもとに自動生成
