@@ -77,6 +77,7 @@ const getFreeBusy200Response: GetFreeBusy200Response = {
  * @summary ユーザの情報を取得するAPI
  * @export
  * @class UserinfoApi
+ * @param {Configuration} [config] モックのため受け取ったパラメータは使用しない
  */
 export class UserinfoApi extends BaseAPI {
   /**
@@ -93,6 +94,7 @@ export class UserinfoApi extends BaseAPI {
  * @summary カレンダー情報を取得するAPI
  * @export
  * @class CalendarApi
+ * @param {Configuration} [config] モックのため受け取ったパラメータは使用しない
  */
 export class CalendarApi extends BaseAPI {
   /**
@@ -108,13 +110,12 @@ export class CalendarApi extends BaseAPI {
    * @summary カレンダーの予定をdataプロパティにくるんで返却
    * @memberof CalendarApi
    * @method
-   * @param {getFreeBusyRequest} [getFreeBusyRequest]
+   * @param {getFreeBusyRequest} [getFreeBusyRequest] モックのため受け取ったパラメータは使用しない
    * @returns data:GetFreeBusyRequest
    */
   public getFreeBusy(
     getFreeBusyRequest?: GetFreeBusyRequest
   ): Promise<{ data: GetFreeBusy200Response }> {
-    // モックのため、リクエストパラメータは使用しない
     getFreeBusyRequest;
     return Promise.resolve({ data: getFreeBusy200Response });
   }
