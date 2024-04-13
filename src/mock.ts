@@ -51,7 +51,7 @@ const getFreeBusy200Response: GetFreeBusy200Response = {
   timeMin: '2024-04-01T00:00:00Z',
   timeMax: '2024-04-07T23:59:59Z',
   calendars: {
-    keys: {
+    'primary@gmail.com': {
       errors: [{ domain: 'Error message 1' }, { reason: 'Error message 2' }],
       busy: [
         { start: '2024-04-01T08:00:00Z', end: '2024-04-01T10:00:00Z' },

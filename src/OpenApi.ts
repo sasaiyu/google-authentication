@@ -1,11 +1,11 @@
-import { Configuration, GetFreeBusyRequest } from '@/types/typescript-axios';
+import {
+  Configuration,
+  GetFreeBusyRequest,
+  BusyInner,
+} from '@/types/typescript-axios';
 
 // import { CalendarApi, UserinfoApi } from '@/mock';
-import {
-  BusyInner,
-  CalendarApi,
-  UserinfoApi,
-} from '@/types/typescript-axios/api';
+import { CalendarApi, UserinfoApi } from '@/types/typescript-axios/api';
 
 /**
  * @summary OpenAPI GeneratorのAPIのインスタンス化で使用する
