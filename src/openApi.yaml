@@ -164,9 +164,8 @@ components:
                 $ref: '#/components/schemas/timeMax'
               calendars:
                 type: object
-                properties:
-                  keys:
-                    $ref: '#/components/schemas/keys'
+                additionalProperties:
+                  $ref: '#/components/schemas/keys'
     calendarEvents:
       description: ok
       content:

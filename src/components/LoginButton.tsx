@@ -3,8 +3,12 @@ import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 
 import { googleConfig } from '@/config';
 import { GetFreeBusyRequest } from '@/types/typescript-axios/api';
-import { Configuration } from '@/types/typescript-axios';
-import { getCalendarList, getFreeBusy, getUserinfo } from '~/src/OpenApi';
+import {
+  getFreeBusy,
+  getUserinfo,
+  getCalendarId,
+  setConfiguration,
+} from '@/OpenApi';
 
 export const LoginButton = () => {
   const [token, setToken] = useState<string>('');
@@ -29,14 +33,13 @@ export const LoginButton = () => {
       const fetchData = async () => {
         try {
           // Googleログイン認証で取得したBear認証を更新
-          const config = new Configuration();
-          config.accessToken = token;
+          setConfiguration(token);
 
           // ユーザ情報を取得
-          const userinfo = await getUserinfo(config);
+          const userinfo = await getUserinfo();
 
           // カレンダーのIDを取得
-          const id = await getCalendarList(config);
+          const id = await getCalendarId();
           const calendarId = id ? id : userinfo.email;
 
           // カレンダーの空き時間を取得(UTC標準)
@@ -45,7 +48,7 @@ export const LoginButton = () => {
             timeMax: '2024-04-06T20:00:00+09:00',
             items: [{ id: calendarId }],
           };
-          const freeBusyResponse = await getFreeBusy(config, param);
+          const freeBusyResponse = await getFreeBusy(param);
 
           // 出力される時間もJTCへの変換が必要
           console.log(freeBusyResponse);
